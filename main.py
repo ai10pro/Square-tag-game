@@ -95,8 +95,9 @@ def main():
     disp_h = int(chips_s * map_s.y)
     screen = pg.display.set_mode((disp_w,disp_h))
     clock = pg.time.Clock()
-    font = pg.font.Font(None,15)
+    font = pg.font.Font(None,50)
     frame = 0
+    score = 0
     exit_flag = False
     game_over = False
     move_enable = False
@@ -127,8 +128,10 @@ def main():
     Enemy = EnemyCharacter((4,4),'./data/img/shinigami.png') # 鬼
 
     # ゲームループ
-    while (not exit_flag) and (not game_over):
+    while not exit_flag:
 
+        
+        
         # システムイベントの検出
         cmd_move = -1
         for event in pg.event.get():
@@ -148,39 +151,49 @@ def main():
                 if (event.key == pg.K_RETURN) or (move_enable) :
                     return
         
-        # 背景描画
-        screen.fill(pg.Color('WHITE'))
+        if game_over :
+            screen.fill(pg.Color('#000000'))
+            screen.blit(font.render("GAME OVER",False,'red'),(disp_w//2 - 100,disp_h//2 - 40))
+            screen.blit(font.render(f'Score : {score}',False,'yellow'),(disp_w/2 - 100,disp_h/2))
+        else :
 
-        # Player.draw_rect(screen,Player.pos,field_range)
+            # 背景描画
+            screen.fill(pg.Color('WHITE'))
 
-        # グリッド
-        showGrid.draw_grid(screen)
+            # Player.draw_rect(screen,Player.pos,field_range)
 
-        # ☆移動コマンド処理
-        if cmd_move != -1:
-            af_pos = Player.pos + m_vec[cmd_move]     # 移動後の「仮」座標
-            if (field_range[0].x <= af_pos.x <= field_range[1].x) and (field_range[0].y <= af_pos.y <= field_range[1].y):
-                Player.move_to(m_vec[cmd_move])
-                Enemy.move(field_range)
+            # グリッド
+            showGrid.draw_grid(screen)
 
-        # 自キャラ描画
-        screen.blit(Player.img,Player.get_dp())
-        screen.blit(Enemy.img,Enemy.get_dp())
+            # ☆移動コマンド処理
+            if cmd_move != -1:
+                af_pos = Player.pos + m_vec[cmd_move]     # 移動後の「仮」座標
+                if (field_range[0].x <= af_pos.x <= field_range[1].x) and (field_range[0].y <= af_pos.y <= field_range[1].y):
+                    Player.move_to(m_vec[cmd_move])
+                    Enemy.move(field_range)
+                    score += 1
 
-        # プレイヤーと鬼が同じ場所になったかどうかの確認
-        if Player.get_dp() == Enemy.get_dp() :
-            print("finish")
-            game_over = True
 
-        # フレームカウンタ・キャラの位置の描画
-        frame += 1
-        frm_str = f'{frame:05}'
-        screen.blit(font.render(frm_str,True,'BLACK'),(10,10))
-        screen.blit(font.render(f'{Player.pos}',True,'BLACK'),(10,20))
+            # 自キャラ描画
+            screen.blit(Player.img,Player.get_dp())
+            screen.blit(Enemy.img,Enemy.get_dp())
+
+            # プレイヤーと鬼が同じ場所になったかどうかの確認
+            if Player.get_dp() == Enemy.get_dp() :
+                print("finish")
+                game_over = True
+
+            # フレームカウンタ・キャラの位置の描画
+            frame += 1
+            frm_str = f'{frame:05}'
+            screen.blit(font.render(frm_str,True,'BLACK'),(10,10))
+            screen.blit(font.render(f'player_pos{Player.pos - pg.Vector2(1,1)}',True,'BLACK'),(10,400))
+            screen.blit(font.render(f'score:{score}',True,'BLACK'),(10,440))
 
         # 画面の更新と同期
         pg.display.update()
         clock.tick(30)
+
 
     # ゲームループ{ここまで}
     pg.quit()
