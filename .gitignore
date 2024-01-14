@@ -1,0 +1,5 @@
+.venv/
+
+setup.py
+player.py
+__pycache__/
